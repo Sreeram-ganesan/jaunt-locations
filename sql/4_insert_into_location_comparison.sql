@@ -10,6 +10,7 @@ INSERT INTO location_comparison (
         point2,
         descriptions,
         similarity_score,
+        similarity_score_2,
         distance_in_meters
     )
 SELECT distinct Concat(l1.contentid,l2.contentid) as duplicateid,
@@ -21,6 +22,7 @@ SELECT distinct Concat(l1.contentid,l2.contentid) as duplicateid,
     ARRAY [l2.latitude, l2.longitude] AS point2,
     ARRAY [l1.description, l2.description] AS descriptions,
     jaro_winkler_similarity(l1.title, l2.title) AS similarity_score,
+    damerau_levenshtein(l1.title, l2.title) AS similarity_score_2,
     ST_DISTANCE_SPHEROID(
         ST_POINT(l1.latitude, l1.longitude),
         ST_POINT(l2.latitude, l2.longitude)

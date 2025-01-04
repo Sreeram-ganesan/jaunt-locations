@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS location_comparison (
     point2 FLOAT [],
     descriptions TEXT [],
     similarity_score FLOAT,
+    similarity_score_2 FLOAT,
     distance_in_meters FLOAT
 );
