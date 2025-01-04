@@ -1,0 +1,2 @@
+LOAD h3;UPDATE locations SET h3_index_8 = h3_latlng_to_cell(CAST(latitude AS FLOAT), CAST(longitude AS FLOAT), 8) where h3_index_8 is null;
+UPDATE locations SET h3_index_12 = h3_latlng_to_cell(CAST(latitude AS FLOAT), CAST(longitude AS FLOAT), 12) where h3_index_12 is null;
