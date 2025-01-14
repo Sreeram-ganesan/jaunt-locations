@@ -23,6 +23,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating locations table in DuckDB: %s", err)
 	}
+	// err = seed.InsertJSONIntoLocationsTableInDuckDB("data/locations.db", "ny-data/csv/nyc_filtered_locations_resolution_8.jsonl")
+	// if err != nil {
+	// 	log.Printf("Error inserting JSON into DuckDB: %s", err)
+	// }
 	err = seed.InsertJSONIntoLocationsTableInDuckDB("data/locations.db", "data/t_content_202501021703_new.jsonl")
 	if err != nil {
 		log.Printf("Error inserting JSON into DuckDB: %s", err)

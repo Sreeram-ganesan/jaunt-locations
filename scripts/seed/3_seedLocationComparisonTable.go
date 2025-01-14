@@ -26,7 +26,17 @@ func CompareLocations(dbFilePath string) error {
 	} else {
 		fmt.Println("location_comparison table created successfully or already exists")
 	}
-
+	queryBytes, err = os.ReadFile("sql/5_add_soft_delete_to_location_comparison.sql")
+	if err != nil {
+		return fmt.Errorf("failed to read query file: %w", err)
+	}
+	addColumnQuery := string(queryBytes)
+	_, err = db.Exec(addColumnQuery)
+	if err != nil {
+		return fmt.Errorf("failed to add column soft_delete to location_comparison table: %w", err)
+	} else {
+		fmt.Println("added the soft_delete column with false as default successfully to location_comparison table")
+	}
 	return nil
 }
 

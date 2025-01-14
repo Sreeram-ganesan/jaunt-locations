@@ -17,6 +17,7 @@ func ArchiveAndRemoveDuplicateLocations(dbFilePath string) error {
 
 	//create duplicate_locations table
 	createTableQuery := `
+		DROP TABLE IF EXISTS duplicate_locations;
 		CREATE TABLE IF NOT EXISTS duplicate_locations AS
 		SELECT * FROM locations WHERE 1=0;
 	`

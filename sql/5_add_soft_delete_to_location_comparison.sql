@@ -1,0 +1,1 @@
+alter table location_comparison add column if not exists soft_deleted BOOLEAN default false;

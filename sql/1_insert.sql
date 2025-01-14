@@ -27,9 +27,12 @@ INSERT OR REPLACE INTO locations (
         state,
         h3_index_8,
         h3_index_12,
-        is_title_duplicate
+        is_title_duplicate,
+        embeddings,
+        word_count,
+        tag
     )
-SELECT contentid::UUID,
+SELECT contentid,
     source_id,
     title,
     subtitle,
@@ -56,7 +59,10 @@ SELECT contentid::UUID,
     state,
     h3_latlng_to_cell(CAST(latitude AS FLOAT), CAST(longitude AS FLOAT), 8) as h3_index_8,
     h3_latlng_to_cell(CAST(latitude AS FLOAT), CAST(longitude AS FLOAT), 12) as h3_index_12,
-    false AS is_title_duplicate
+    false AS is_title_duplicate,
+    '{}' as embeddings,
+    0 as word_count,
+    'blue' as tag
 FROM read_json(
         '%s',
         ignore_errors = true

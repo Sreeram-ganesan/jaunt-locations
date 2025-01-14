@@ -27,5 +27,8 @@ CREATE TABLE IF NOT EXISTS locations (
     state TEXT,
     h3_index_8 UBIGINT,
     h3_index_12 UBIGINT,
-    is_title_duplicate BOOLEAN
+    word_count INT,
+    tag TEXT default 'blue',
+    is_title_duplicate BOOLEAN,
+    embeddings JSON default '[]',
 );
