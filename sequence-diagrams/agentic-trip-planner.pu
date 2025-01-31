@@ -1,0 +1,58 @@
+@startuml
+title Agentic Trip Planner
+actor User
+participant "Trip Planning Agent" as Agent
+participant "Vector Database" as VecDB
+participant "Large Language Model" as LLM
+participant "Weather API" as WeatherAPI
+participant "Google Maps API" as MapsAPI
+participant "Google Places API" as PlacesAPI
+participant "Jaunt Locations API" as LocAPI
+participant "Jaunt Restraunts and Activities API" as RestaurantsAndActivitiesAPI
+participant "User Interface" as UI
+
+User -> UI : Enter trip planning request
+UI -> Agent : Send user query(with date-time (with available times on each day), city(lat,long), type-of-trip, special-requests, no_travellers)
+Agent -> LLM : Construct a prompt to be sent
+LLM --> Agent : Chain of thought begins
+
+Agent -> VecDB : Perform vector search using extracted info above(city,type-of-trip,special-requests(which can be ameneties/special-interests, filtered based on popularity)
+VecDB -> VecDB : Update embeddings with user query against user id
+note right of VecDB
+    Pre-requisite:Vector embeddings are created and kept updated with jaunt location data
+end note
+VecDB --> Agent : Return list of matching location ids
+
+' Agent -> MapsAPI : Calculate travel times and distances between locations
+' MapsAPI --> Agent : Return optimized routes and travel details
+alt Fetch Jaunt Locations with meta data (this step is needed if we cannot store the meta information in vector database)
+    Agent -> LocAPI : Fetch location details for matching location ids
+    LocAPI --> Agent : Return location data (e.g., running hours, type of location, etc.) with meta_present as boolean flag
+else Location meta data not available i.e meta_present = false
+    Agent -> MapsAPI : Fetch live data for locations if missing from above step for each location(e.g., running hours, type of location, etc.)
+    MapsAPI --> Agent : Return live data for locations
+end
+Agent -> WeatherAPI : Fetch weather forecasts for planned locations and dates
+WeatherAPI --> Agent : Return weather data (e.g., sunny, rainy, etc.)
+alt Good Weather
+    Agent -> LLM : Generate trip plan using location, weather, and route data
+    LLM --> Agent : Return optimized trip plan (e.g., day-wise itinerary)
+else Bad Weather Detected
+    Agent -> LLM : Request alternative plan based on weather conditions
+    LLM --> Agent : Return suggested modified trip plan with recommendations
+    Agent -> UI : Send the trip details + weather warning details along with changed trip plan
+end
+
+alt Fetch nearby activities and restaurants for the picked location ids
+    Agent -> RestaurantsAndActivitiesAPI : Fetch nearby activities and restaurants for breaks for the planned trip
+    RestaurantsAndActivitiesAPI --> Agent : Return nearby place recommendations
+else Nearby activities and restaurants not available
+    Agent -> PlacesAPI : Suggest nearby activities or restaurants for breaks
+    PlacesAPI --> Agent : Return nearby place recommendations
+end
+Agent -> UI : Display final trip plan with route, timing, and weather updates along with nearby activities and restaurants
+User -> UI : Provide feedback (optional)
+UI -> Agent : Send feedback
+Agent -> VecDB : Update embeddings with user feedback
+Agent -> VecDB : Store route and weather data for future optimization
+@enduml
