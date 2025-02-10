@@ -12,11 +12,11 @@ def connect_to_all_tables():
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(
-            host=rds_url_2,
+            host=rds_url,
             port=port,
             dbname=dbname,
             user=username,
-            password=password_2
+            password=password
         )
         cursor = connection.cursor()
         # Execute the query to list all tables

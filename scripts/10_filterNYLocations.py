@@ -250,6 +250,9 @@ def create_h3_map_for_boundary_locations():
     select * from locations where contentid in (SELECT UNNEST(contentids)
     FROM boundary_locations where boundary_id in (select id from boundaries where names.primary = 'City of New York'));
     """
+    queryToGetBoundaryLocations = """
+    select * from locations where overtures_region = 'New York';
+    """
     conn = duckdb.connect("data/locations.db")
     boundary_locations_df = conn.execute(queryToGetBoundaryLocations).fetchdf()
     conn.close()
@@ -268,61 +271,61 @@ def create_h3_map_for_boundary_locations():
     # print(geo.get("type"))
     boundary = shape(geo)
     # print(boundary)
-    create_h3_map(boundary_locations_df, "latitude", "longitude", "ny-data/nyc_filtered_including_duplicates_with_overtures_boundary.html", add_neighbourhood=True, neighbourhood_boundary=boundary)
+    create_h3_map(boundary_locations_df, "latitude", "longitude", "ny-data/nyc_filtered_including_duplicates_with_overtures_boundary_region_new.html", add_neighbourhood=True, neighbourhood_boundary=boundary)
 # Main function
 def main():
     # Connect to DuckDB
-    db_path = "data/locations.db"  # Update with your database path
-    conn = duckdb.connect(db_path)
-    query0 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
-    """
-    all_locations_df = conn.execute(query0).fetchdf()
-    # Close the connection
-    conn.close()
-    conn = duckdb.connect(db_path)
-    query_union = """
-    SELECT DISTINCT ON (l.contentid) l.*, COALESCE(d.tag, 'blue') AS tag
-    FROM locations l
-    LEFT JOIN duplicate_locations d ON l.contentid = d.contentid
-    WHERE l.contentid NOT IN (SELECT contentid FROM duplicate_locations)
-    UNION
-    SELECT DISTINCT ON (d.contentid) d.*, d.tag
-    FROM duplicate_locations d;
-    """
-    all_locations_and_duplicates_df = conn.execute(query_union).fetchdf()
-    conn.close()
-    conn = duckdb.connect(db_path)
+    # db_path = "data/locations.db"  # Update with your database path
+    # conn = duckdb.connect(db_path)
+    # query0 = """
+    # SELECT DISTINCT ON (contentid) *
+    # FROM locations
+    # WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+    # """
+    # all_locations_df = conn.execute(query0).fetchdf()
+    # # Close the connection
+    # conn.close()
+    # conn = duckdb.connect(db_path)
+    # query_union = """
+    # SELECT DISTINCT ON (l.contentid) l.*, COALESCE(d.tag, 'blue') AS tag
+    # FROM locations l
+    # LEFT JOIN duplicate_locations d ON l.contentid = d.contentid
+    # WHERE l.contentid NOT IN (SELECT contentid FROM duplicate_locations)
+    # UNION
+    # SELECT DISTINCT ON (d.contentid) d.*, d.tag
+    # FROM duplicate_locations d;
+    # """
+    # all_locations_and_duplicates_df = conn.execute(query_union).fetchdf()
+    # conn.close()
+    # conn = duckdb.connect(db_path)
 
-    # Query the duplicate locations table
-    query = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations 
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
-    """
-    locations_df = conn.execute(query).fetchdf()
-    # Close the connection
-    conn.close()
-    conn = duckdb.connect(db_path)
+    # # Query the duplicate locations table
+    # query = """
+    # SELECT DISTINCT ON (contentid) *
+    # FROM duplicate_locations 
+    # WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+    # """
+    # locations_df = conn.execute(query).fetchdf()
+    # # Close the connection
+    # conn.close()
+    # conn = duckdb.connect(db_path)
 
-    # Query the locations table
+    # # Query the locations table
+    # # query1 = """
+    # # SELECT title, city, latitude, longitude, TRUE AS is_title_duplicate, tag
+    # # FROM duplicate_locations
+    # # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='red';
+    # # """
+    # # Query to get all locations + duplicates in the same dataframe with default tag as blue for locations and tag for duplicates and duplicates should not be repeated in the final dataframe
     # query1 = """
-    # SELECT title, city, latitude, longitude, TRUE AS is_title_duplicate, tag
+    # SELECT DISTINCT ON (contentid) *
     # FROM duplicate_locations
     # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='red';
     # """
-    # Query to get all locations + duplicates in the same dataframe with default tag as blue for locations and tag for duplicates and duplicates should not be repeated in the final dataframe
-    query1 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='red';
-    """
-    duplicates_df1 = conn.execute(query1).fetchdf()
-    # Close the connection
-    conn.close()
-    conn = duckdb.connect(db_path)
+    # duplicates_df1 = conn.execute(query1).fetchdf()
+    # # Close the connection
+    # conn.close()
+    # conn = duckdb.connect(db_path)
 
     # Query the locations table
     # query2 = """
@@ -330,30 +333,30 @@ def main():
     # FROM duplicate_locations
     # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='lightred';
     # """
-    query2 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='lightred';
-    """
-    duplicates_df2 = conn.execute(query2).fetchdf()
-    conn.close()
-    conn = duckdb.connect(db_path)
+    # query2 = """
+    # SELECT DISTINCT ON (contentid) *
+    # FROM duplicate_locations
+    # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='lightred';
+    # """
+    # duplicates_df2 = conn.execute(query2).fetchdf()
+    # conn.close()
+    # conn = duckdb.connect(db_path)
 
-    # Query the locations table
+    # # Query the locations table
+    # # query3 = """
+    # # SELECT title, city, latitude, longitude, TRUE AS is_title_duplicate, tag
+    # # FROM duplicate_locations
+    # # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='darkred';
+    # # """
     # query3 = """
-    # SELECT title, city, latitude, longitude, TRUE AS is_title_duplicate, tag
+    # SELECT DISTINCT ON (contentid) *
     # FROM duplicate_locations
     # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='darkred';
     # """
-    query3 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='darkred';
-    """
-    duplicates_df3 = conn.execute(query3).fetchdf()
-    conn.close()
+    # duplicates_df3 = conn.execute(query3).fetchdf()
+    # conn.close()
 
-    conn = duckdb.connect(db_path)
+    # conn = duckdb.connect(db_path)
 
     # Query the locations table
     # query4 = """
@@ -361,24 +364,24 @@ def main():
     # FROM duplicate_locations
     # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='pink';
     # """
-    query4 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='pink';
-    """
-    duplicates_df4 = conn.execute(query4).fetchdf()
-    conn.close()
+    # query4 = """
+    # SELECT DISTINCT ON (contentid) *
+    # FROM duplicate_locations
+    # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='pink';
+    # """
+    # duplicates_df4 = conn.execute(query4).fetchdf()
+    # conn.close()
 
-    conn = duckdb.connect(db_path)
+    # conn = duckdb.connect(db_path)
 
-    # Query the locations table
-    query5 = """
-    SELECT DISTINCT ON (contentid) *
-    FROM duplicate_locations
-    WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='purple';
-    """
-    duplicates_df5 = conn.execute(query5).fetchdf()
-    conn.close()
+    # # Query the locations table
+    # query5 = """
+    # SELECT DISTINCT ON (contentid) *
+    # FROM duplicate_locations
+    # WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND tag='purple';
+    # """
+    # duplicates_df5 = conn.execute(query5).fetchdf()
+    # conn.close()
 
 
     # Filter locations for resolutions 8 and 9
